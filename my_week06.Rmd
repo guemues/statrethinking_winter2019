@@ -1,0 +1,442 @@
+---
+title: "Homework 6"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+library(rethinking)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(bayesplot)
+
+```
+
+## Question 1
+
+. The data in data(NWOGrants) are outcomes for scientific funding applications
+for the Netherlands Organization for Scientific Research (NWO) from 2010–2012
+(see van der Lee and Ellemers doi:10.1073/pnas.1510159112). These data have a
+very similar structure to the UCBAdmit data discussed in Chapter 11.
+I want you to consider a similar question: What are the total and indirect causal
+effects of gender on grant awards? Consider a mediation path (a pipe) through discipline. Draw the corresponding DAG and then use one or more binomial GLMs
+to answer the question.
+What is your causal interpretation? If NWO’s goal is to equalize rates of funding
+between the genders, what type of intervention would be most effective?
+
+```{r}
+data(NWOGrants)
+
+d <- NWOGrants
+
+head(d)
+
+```
+```{r}
+d1 <- d %>% 
+  mutate(discipline=as.numeric(discipline), gender=as.numeric(gender))
+
+
+dat_list1 <- list(
+  discipline=d1$discipline,
+  gender=d1$gender,
+  applications=d1$applications,
+  awards=d1$awards,
+  N=18,
+  K=9
+)
+
+head(dat_list1)
+```
+
+
+```{stan, output.var="model"}
+data {
+  
+  int N; // Number of individuals
+  int K; // Number of careers 
+  
+  int awards[N];
+ // int discipline[N];
+  int gender[N];
+  int applications[N];
+  
+  int<lower=0, upper=1> PRIOR_ONLY;
+}
+
+parameters {
+  real<lower=0> sigma;
+  
+  vector[2] gender_effect;
+//  vector[K] discipline_effect;
+  
+}
+
+model{
+  vector[N] mu;
+  
+  for (i in 1:2) {
+    gender_effect[i] ~ normal(-1, 1);
+  }
+  if (PRIOR_ONLY == 0) {
+    for (i in 1:N) {
+      mu[i] = gender_effect[gender[i]];
+    }
+    
+    for (i in 1:N){
+      awards[i] ~ binomial(applications[i], inv_logit(mu[i]));
+    }
+  }
+ 
+}
+
+generated quantities {
+  vector[N] awards_sim;
+  vector[N] mu;
+  
+  for (i in 1:N) {
+    mu[i] = gender_effect[gender[i]];
+  }
+  
+  // prior predictive distributions for p patients:
+  for(i in 1:N) {
+    awards_sim[i] = binomial_rng(applications[i], inv_logit(mu[i]));
+  }
+}
+
+```
+ 
+ 
+Lets first check the prior predictive simulations
+
+
+```{r, include=FALSE}
+prior_mod <- sampling(model, data=c(dat_list1, list(PRIOR_ONLY=1)))
+
+```
+```{r}
+
+color_scheme_set("red")
+ppc_dens_overlay(y = dat_list1$awards,
+                 yrep = extract.samples(prior_mod)$awards_sim[1:100,])
+
+```
+
+```{r, include=FALSE}
+
+posterior_model1 <- sampling(model, data=c(dat_list1, list(PRIOR_ONLY=0)))
+
+```
+
+```{r}
+color_scheme_set("red")
+ppc_dens_overlay(y = dat_list1$awards,
+                 yrep = extract.samples(posterior_model1)$awards_sim[1:100,])
+
+
+```
+
+
+```{r}
+library(ggplot2)
+
+posterior <- as.matrix(posterior_model1)
+
+p1 <- exp(posterior[,'gender_effect[2]'] - posterior[,'gender_effect[1]'])
+
+plot_title <- ggtitle("Posterior distributions",
+                      "with medians and 80% intervals")
+mcmc_areas(matrix(p1, dimnames = list(iterations=NULL, parameters='being_male_relative_effect')), pars=c('being_male_relative_effect'),
+           prob = 0.8) + xlim(0.5,2) + plot_title
+```
+
+```{r}
+
+precis(p1, depth = 2)
+
+
+```
+
+Okay lets consider discipline too
+
+  
+```{stan, output.var="model2"}
+data {
+  
+  int N; // Number of individuals
+  int K; // Number of careers 
+  
+  int awards[N];
+  int discipline[N];
+  int gender[N];
+  int applications[N];
+  
+  int<lower=0, upper=1> PRIOR_ONLY;
+}
+
+parameters {
+  vector[2] gender_effect;
+  vector[K] discipline_effect;
+  
+}
+
+model{
+  vector[N] mu;
+  
+  for (i in 1:2) {
+    gender_effect[i] ~ normal(-1, 1);
+  }
+  
+  for (i in 1:K) {
+    discipline_effect[i] ~ normal(-1, 1);
+  }
+  
+  if (PRIOR_ONLY == 0) {
+    for (i in 1:N) {
+      mu[i] = discipline_effect[discipline[i]] + gender_effect[gender[i]];
+    }
+    
+    for (i in 1:N){
+      awards[i] ~ binomial(applications[i], inv_logit(mu[i]));
+    }
+  }
+ 
+}
+
+generated quantities {
+  vector[N] awards_sim;
+  vector[N] mu;
+  
+  for (i in 1:N) {
+    mu[i] = gender_effect[gender[i]] + discipline_effect[discipline[i]];
+  }
+  
+  
+  // prior predictive distributions for p patients:
+  for(i in 1:N) {
+    awards_sim[i] = binomial_rng(applications[i], inv_logit(mu[i]));
+  }
+}
+
+```
+
+
+Lets first check the prior predictive simulations
+
+
+```{r, include=FALSE}
+prior_mod <- sampling(model2, data=c(dat_list1, list(PRIOR_ONLY=1)) )
+```
+```{r}
+
+color_scheme_set("red")
+ppc_dens_overlay(y = dat_list1$awards,
+                 yrep = extract.samples(prior_mod)$awards_sim[1:100,])
+```
+
+
+```{r , include=FALSE}
+
+posterior_model2 <- sampling(model2, data=c(dat_list1, list(PRIOR_ONLY=0)))
+
+```
+
+```{r}
+color_scheme_set("red")
+ppc_dens_overlay(y = dat_list1$awards,
+                 yrep = extract.samples(posterior_model2)$awards_sim[1:100,])
+
+
+```
+```{r}
+library(ggplot2)
+
+posterior <- as.matrix(posterior_model2)
+
+p2 <- exp(posterior[,'gender_effect[2]'] - posterior[,'gender_effect[1]'])
+
+plot_title <- ggtitle("Posterior distributions",
+                      "with medians and 80% intervals")
+mcmc_areas(matrix(p2, dimnames = list(iterations=NULL, parameters='being_male_relative_effect')), pars=c('being_male_relative_effect'),
+           prob = 0.8)+ plot_title
+```
+
+```{r}
+
+precis(p2, depth = 2)
+
+
+```
+
+## Question 1
+
+
+The data in data(Primates301) were first introduced at the end of Chapter 7.
+In this problem, you will consider how brain size is associated with social learning.
+There are three parts.
+First, model the number of observations of social_learning for each species as
+a function of the log brain size. Use a Poisson distribution for the social_learning
+outcome variable. Interpret the resulting posterior.
+Second, some species are studied much more than others. So the number of reported instances of social_learning could be a product of research effort. Use
+the research_effort variable, specifically its logarithm, as an additional predictor variable. Interpret the coefficient for log research_effort. Does this model
+disagree with the previous one?
+Third, draw a DAG to represent how you think the variables social_learning,
+brain, and research_effort interact. Justify the DAG with the measured associations in the two models above (and any other models you used).
+
+```{r}
+data(Primates301)
+
+d <- Primates301
+
+head(d)
+
+```
+
+```{r}
+d_q3 <- d %>% select(genus, brain, social_learning, research_effort) %>% drop_na()
+
+head(d_q3)
+```
+
+```{stan, output.var="model_q3_1"}
+data {
+  
+  int N; // Number of individuals
+
+  int social_learning[N];
+  real brain[N];
+  int<lower=0, upper=1> PRIOR_ONLY;
+}
+
+parameters {
+  real intercept;
+  real brain_effect;
+}
+
+model{
+  brain_effect ~ normal(0, 0.5);
+  intercept ~ normal(0, 1);
+  
+  if(PRIOR_ONLY == 0){
+    for (i in 1:N) {
+      social_learning[i] ~ poisson(exp( intercept + brain_effect * brain[i]));
+    }
+  }
+}
+
+generated quantities {
+  int social_learning_sim[N];
+  real log_lik[N];
+  
+  for(i in 1:N) {
+    social_learning_sim[i] = poisson_rng(exp(intercept + brain_effect * brain[i]));
+  }
+  
+  for(i in 1:N) {
+    log_lik[i] = poisson_lpmf(social_learning[i] | exp(intercept + brain_effect * brain[i]));
+  }
+}
+
+```
+
+
+Lets first check the prior predictive simulations
+
+```{r}
+
+dat_list_q3 <- list(
+  brain=standardize( log(d_q3$brain)),
+  social_learning=d_q3$social_learning,
+  research_effort=log(d_q3$research_effort),
+  N=150
+)
+
+head(dat_list_q3)
+```
+
+```{r , include=FALSE}
+posterior_q3_1 <- sampling(model_q3_1, data=c(dat_list_q3, list(PRIOR_ONLY=0)))
+
+```
+
+```{r}
+color_scheme_set("red")
+p <- ppc_dens_overlay(bw=2, y = dat_list_q3$social_learning,
+                 yrep = extract.samples(posterior_q3_1)$social_learning_sim[1:100,])
+
+p + xlim(0, 10)
+```
+
+```{stan, output.var="model_q3_2"}
+data {
+  
+  int N; // Number of individuals
+
+  int social_learning[N];
+  real brain[N];
+  real research_effort[N];
+  int<lower=0, upper=1> PRIOR_ONLY;
+}
+
+parameters {
+  real intercept;
+  real brain_effect;
+  real research_effort_effect;
+}
+
+model{
+  brain_effect ~ normal(0, 0.5);
+  research_effort_effect ~ normal(0, 0.5);
+  intercept ~ normal(0, 1);
+  
+  if(PRIOR_ONLY == 0){
+    for (i in 1:N) {
+      social_learning[i] ~ poisson(exp( intercept + brain_effect * brain[i] + research_effort_effect * research_effort[i]));
+    }
+  }
+}
+
+generated quantities {
+  int social_learning_sim[N];
+  real log_lik[N];
+  
+  for(i in 1:N) {
+    social_learning_sim[i] = poisson_rng(exp(intercept + brain_effect * brain[i]  + research_effort_effect * research_effort[i]));
+  }
+    
+  for(i in 1:N) {
+    log_lik[i] = poisson_lpmf(social_learning[i] | exp(intercept + brain_effect * brain[i]  + research_effort_effect * research_effort[i]));
+  }
+  
+}
+
+```
+
+```{r , include=FALSE}
+posterior_q3_2 <- sampling(model_q3_2, data=c(dat_list_q3, list(PRIOR_ONLY=0)))
+
+```
+```{r}
+
+color_scheme_set("red")
+p <- ppc_dens_overlay(bw=3, y = dat_list_q3$social_learning,
+                 yrep = extract.samples(posterior_q3_2)$social_learning_sim[1:100,])
+
+p + xlim(0, 10)
+```
+
+```{r}
+library(loo)
+loo_compare(loo(posterior_q3_1), loo(posterior_q3_2))
+
+```
+```{r}
+waic1 <- WAIC( posterior_q3_1 , pointwise=TRUE )$WAIC
+waic2 <- WAIC( posterior_q3_2 , pointwise=TRUE )$WAIC
+plot( waic1 - waic2 , dat_list_q3$research_effort , pch=16)
+identify( waic1-waic2 , dat_list_q3$log_effort , d_q3$genus , cex=0.8 )
+
+
+```
+

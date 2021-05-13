@@ -1,0 +1,160 @@
+---
+title: "Homework 3"
+output:
+  pdf_document: default
+---
+
+Used libraries are:
+
+```{=tex}
+\begin{itemize}
+  \item rethinking
+  \item ggplot2
+\end{itemize}
+```
+```{r setup, include=FALSE}
+library(rethinking)
+library(ggplot2)
+library(dplyr)
+```
+
+## Question 1
+
+**Use a model to infer the total causal influence of area on weight. Would
+increasing the area available to each fox make it heavier (healthier)? You
+might want to standardize the variables. Regardless, use prior predictive
+simulation to show that your model’s prior predictions stay within the possible outcome range.**
+
+
+There is no need to control on anything on this question. Lets start with standardize the data except the group column.
+
+```{r}
+
+data(foxes)
+
+df <- foxes
+
+d1 <- df %>% scale %>% as.data.frame() %>% mutate(group=df$group)
+
+head(d1)
+
+```
+
+Lets create the model and check our priors
+
+```{r}
+flist <- alist(
+  weight ~ dnorm(mu, sigma),
+  mu ~ a + b * area,
+  a ~ dnorm(0, 1),
+  b ~ dnorm(0, 0.5),
+  sigma ~ dunif(0, 1)
+)
+
+homework_3_question_1 <- quap(flist, data=d1)
+
+```
+
+
+Lets visualize the prior models
+
+```{r}
+
+prior <- extract.prior( homework_3_question_1 )
+
+area_seq <- seq( from=min(d1$area) , to=max(d1$area), length.out=50 )
+
+mu <- link( homework_3_question_1 , post=prior, data=list(area= area_seq))
+
+plot( NULL , xlim=range(area_seq) , ylim=range(d1$weight), xlab="area (std)" , ylab="weight" )
+for ( i in 1:50 ) lines( area_seq , mu[i,] , col=col.alpha("black",0.5) )
+
+```
+Okay lets check the posterior distribution
+
+```{r}
+
+precis(homework_3_question_1)
+
+
+```
+
+
+No effect found on the dataset of area on weight
+
+
+
+## Question 2
+
+
+Causal flow from food to weight follow two different route, food -> group size -> weight and food -> weight. We focus on both of these effects as we need to know what will happen when we add more food on the territory. 
+
+
+```{r}
+flist <- alist(
+  weight ~ dnorm(mu, sigma),
+  mu ~ a + b * avgfood,
+  a ~ dnorm(0, 1),
+  b ~ dnorm(0, 1),
+  sigma ~ dunif(0, 1)
+)
+
+homework_3_question_2 <- quap(flist, data=d1)
+
+prior <- extract.prior( homework_3_question_1 )
+
+avgfood_seq <- seq( from=min(d1$avgfood) , to=max(d1$avgfood), length.out=50 )
+
+mu <- link( homework_3_question_2 , post=prior, data=list(avgfood= avgfood_seq))
+
+plot( NULL , xlim=range(avgfood_seq) , ylim=range(d1$weight), xlab="area (std)" , ylab="weight" )
+for ( i in 1:50 ) lines( avgfood_seq , mu[i,] , col=col.alpha("black",0.5) )
+
+```
+
+
+```{r}
+
+precis(homework_3_question_2)
+
+
+```
+
+
+
+
+## Question 3
+
+We should control for avgfood to find the effect of group_size on weight, as there is a back door from group size to weight.
+
+There is two path from group size to weight
+
+* group size -> weight 
+
+* group size <- avg food -> weight
+
+```{r}
+
+flist <- alist(
+  weight ~ dnorm(mu, sigma),
+  mu ~ a + b * avgfood + c * groupsize,
+  a ~ dnorm(0, 1),
+  b ~ dnorm(0, 0.5),
+  c ~ dnorm(0, 0.5),
+  sigma ~ dunif(0, 1)
+)
+
+homework_3_question_3 <- quap(flist, data=d1)
+
+precis(homework_3_question_3)
+
+```
+
+So we completed the DAG, the effect of avg food and group_size and cancel out each other. So we do not see any effect of area. 
+
+
+
+
+
+
+

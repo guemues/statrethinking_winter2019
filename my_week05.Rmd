@@ -1,0 +1,192 @@
+---
+title: "Homework 5"
+output:
+pdf_document: default
+---
+
+```{r setup, include=FALSE}
+library(rethinking)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(brms)
+library(here)
+
+
+```
+
+### Question 7E1
+```{r}
+
+data(Wines2012)
+d <- Wines2012
+
+dat_list <- list(
+    S = standardize(d$score),
+    jid = as.integer(d$judge),
+    wid = as.integer(d$wine) )
+
+```
+
+```{r}
+
+
+
+m1 <- ulam(
+    alist(
+        S ~ dnorm( mu , sigma ),
+        mu <- a[jid] + w[wid],
+        a[jid] ~ dnorm(0,0.5),
+        w[wid] ~ dnorm(0,0.5),
+        sigma ~ dexp(1)
+    ), data=dat_list , chains=4 , cores=4 , cmdstan=TRUE )
+
+coef <- precis(m1,2)
+coef$name <- row.names(coef)
+coef
+```
+```{r}
+p <- ggplot(data = coef, aes(x = reorder(name, mean),
+                              y = mean, ymin = `5.5%`, ymax = `94.5%`))
+
+p + geom_hline(yintercept = 0, color = "gray80") +
+    geom_pointrange() + coord_flip() +
+    labs(x = NULL, y = "Average Marginal Effect") 
+```
+```{r}
+d2 <- as.data.frame(dat_list) %>%
+  mutate(jid=as.factor(jid)) %>%
+  mutate(wid=as.factor(wid))
+d2
+```
+
+```{r, results='hide', include=FALSE}
+
+
+m1 <- brm(S ~ jid + wid, data=d2,
+              family = gaussian,
+              prior = c(prior(normal(0, 0.5), class = b)),
+                        prior(exponential(1), class = sigma))
+
+
+```
+
+
+
+```{r}
+df <- as.data.frame(posterior_summary(m1, probs = c(0.1, 0.9))) %>% filter(Estimate > -10)
+
+df$name <- row.names(df) 
+
+p <- ggplot(data = df, aes(x = reorder(name, Estimate  ),
+                              y = Estimate  , ymin = Q10, ymax = Q90))
+
+p + geom_hline(yintercept = 0, color = "gray80") +
+    geom_pointrange() + coord_flip() +
+    labs(x = NULL, y = "Average Marginal Effect") 
+```
+```{r}
+d3 <- d %>%
+  mutate(wine.amer=factor(wine.amer, labels=c('French', 'American')) ) %>%
+  mutate(judge.amer=factor(judge.amer, labels=c('French', 'American') )) %>%
+  mutate(score=standardize(score)) %>%
+  select(score, flight, wine.amer, judge.amer)  
+d3
+```
+
+
+```{r, results='hide', include=FALSE}
+
+m3 <-
+  brm(data = d3, family = gaussian,
+      formula= score ~ flight + wine.amer + judge.amer,
+              prior = c(prior(normal(0, 0.5), class = b)),
+                        prior(exponential(1), class = sigma))
+      
+```
+
+
+```{r}
+
+df <- as.data.frame(posterior_summary(m3, probs = c(0.1, 0.9))) %>% filter(Estimate > -10)
+
+df$name <- row.names(df) 
+
+p <- ggplot(data = df, aes(x = reorder(name, Estimate  ),
+                              y = Estimate  , ymin = Q10, ymax = Q90))
+
+p + geom_hline(yintercept = 0, color = "gray80") +
+    geom_pointrange() + coord_flip() +
+    labs(x = NULL, y = "Average Marginal Effect")
+
+```
+```{r, results='hide', include=FALSE}
+
+m4 <-
+  brm(data = d3, family = gaussian,
+      formula= score ~ flight + wine.amer + judge.amer + flight:wine.amer + flight:judge.amer + wine.amer:judge.amer,
+              prior = c(prior(normal(0, 0.5), class = b)),
+                        prior(exponential(1), class = sigma))
+      
+```
+```{r}
+d3s <- d %>% 
+  mutate(S=standardize(score)) %>%
+  mutate(wid= wine.amer + 1L) %>%
+  mutate(jid= judge.amer + 1L) %>%
+  rowwise %>%
+  mutate(fid =ifelse(flight == 'white', 2L, 1L)) %>%
+  select(S, wid , jid, fid)  
+d3s
+```
+
+
+```{r}
+
+row_labels = c("FFR", "FFW", "FAR", "FAW", "AFR", "AFW", "AAR", "AAW")
+
+mcode <- "
+data {
+  
+  vector[180] S;
+  
+  int fid[180];
+  int jid[180];
+  int wid[180];
+  
+}
+
+parameters {
+  real w[2,2,2];
+  real<lower=0> sigma;
+}
+
+model{
+  vector[180] mu;
+  sigma ~ exponential(1);
+  for (i in 1:2)
+    for (j in 1:2)
+      for (k in 1:2)
+        w[i,j,k] ~ normal(0, 0.5);
+        
+    for (i in 1:180) {
+      mu[i] = w[wid[i], jid[i], fid[i]];
+    }
+    
+    S ~ normal(mu, sigma);
+}
+"
+
+m3s <- stan(model_code = mcode, data=d3s, cores=4)
+```
+```{r}
+row_labels = c("FFR", "FFW", "FAR", "FAW", "AFR", "AFW", "AAR", "AAW")
+
+
+
+results <- precis(m3s, 3, pars='w')
+row.names(results) <- row_labels
+results
+
+```
+
