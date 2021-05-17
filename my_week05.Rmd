@@ -1,7 +1,7 @@
 ---
 title: "Homework 5"
 output:
-pdf_document: default
+  pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -57,7 +57,7 @@ p + geom_hline(yintercept = 0, color = "gray80") +
 d2 <- as.data.frame(dat_list) %>%
   mutate(jid=as.factor(jid)) %>%
   mutate(wid=as.factor(wid))
-d2
+head(d2)
 ```
 
 ```{r, results='hide', include=FALSE}
@@ -91,7 +91,7 @@ d3 <- d %>%
   mutate(judge.amer=factor(judge.amer, labels=c('French', 'American') )) %>%
   mutate(score=standardize(score)) %>%
   select(score, flight, wine.amer, judge.amer)  
-d3
+head(d3)
 ```
 
 
@@ -137,7 +137,7 @@ d3s <- d %>%
   rowwise %>%
   mutate(fid =ifelse(flight == 'white', 2L, 1L)) %>%
   select(S, wid , jid, fid)  
-d3s
+head(d3s)
 ```
 
 
@@ -186,7 +186,7 @@ row_labels = c("FFR", "FFW", "FAR", "FAW", "AFR", "AFW", "AAR", "AAW")
 
 results <- precis(m3s, 3, pars='w')
 row.names(results) <- row_labels
-results
+head(results)
 
 ```
 

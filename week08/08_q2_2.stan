@@ -12,8 +12,12 @@ parameters {
   real dD_mean; // varying intercept mean
 }
 
+transformed parameters {
+  vector[K] dDk;
+  dDk = dD_mean + dD * dD_sigma;
+}
+
 model{
-  
   vector[N] u;
   
   dD_sigma ~ exponential(1);
@@ -23,7 +27,7 @@ model{
   dD ~ normal(0, 1); // uncentered version
   
   //u = inv_logit(A);
-  u = inv_logit((dD_mean + dD * dD_sigma)[D]); // uncentered version
+  u = inv_logit(dDk[D]); // uncentered version
   
   C ~ bernoulli(u);
 }
@@ -32,10 +36,10 @@ generated quantities {
   vector[N] u;
   vector[N] log_lik;
   
-  u = inv_logit(dD_mean + dD * dD_sigma); // uncentered version
+  u = inv_logit(dDk[D]); // uncentered version
   
   
   for (i in 1:N) {
-    log_lik[i] = bernoulli_lpmf(C[i] | u[D]);
+    log_lik[i] = bernoulli_lpmf(C[i] | u[i]);
   }
 }

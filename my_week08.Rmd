@@ -110,17 +110,94 @@ d_q2 <- bangladesh
 d_q2$district_id <- as.integer(as.factor(d_q2$district))
 
 dat_list_q2 <- list(
-  C=d$district_id,
-  D=d$district_id,
+  C=d_q2$use.contraception,
+  D=d_q2$district_id,
   N=1934,
   K=max(d_q2$district_id)
 )
 
 ```
 ```{r}
-
 model_q2_1_fit <- stan(file='week08/08_q2_1.stan', data=dat_list_q2, cores=4)
 
+```
+
+```{r}
+model_q2_2_fit <- stan(file='week08/08_q2_2.stan', data=dat_list_q2, cores=4)
+```
+
+```{r}
+compare(model_q2_1_fit, model_q2_2_fit)
 
 ```
+```{r}
+
+post1 <- extract.samples( model_q2_1_fit )
+post2 <- extract.samples( model_q2_2_fit )
+
+p1 <- apply( post1$dD, 2 , mean )
+p2 <- apply( post2$dDk, 2 , mean )
+
+nd <- max(dat_list_q2$D)
+plot( NULL , xlim=c(1,nd) , ylim=c(-1,1) , ylab="prob use contraception" ,
+xlab="district" )
+points( 1:nd , inv_logit(p1) , pch=16 , col='blue' )
+points( 1:nd , inv_logit(p2), col='red')
+#abline( h=mean(inv_logit(post2$a_bar)) , lty=2 )
+
+```
+## Question 3
+
+Return to the Trolley data, data(Trolley), from Chapter 12. Define and fit a
+varying intercepts model for these data. By this I mean to add an intercept parameter
+for the individual to the linear model. Cluster the varying intercepts on individual
+participants, as indicated by the unique values in the id variable. Include action,
+intention, and contact as before. Compare the varying intercepts model and a
+model that ignores individuals, using both WAIC/LOO and posterior predictions.
+What is the impact of individual variation in these data?
+
+```{r}
+data(Trolley)
+
+d_q3 <- Trolley
+
+edu_levels <- c(6, 1, 8, 4, 7, 2, 5, 3)
+d_q3$edu_new <- edu_levels[d_q3$edu]
+
+dat_list_q3 <- list(
+  response=d_q3$response,
+  P=as.numeric(factor(d_q3$id)),
+  A=d_q3$action,
+  I=d_q3$intention,
+  C=d_q3$contact,
+  IA=d_q3$intention * d_q3$action,
+  IC=d_q3$intention * d_q3$contact,
+  E=as.integer(d_q3$edu_new),
+  F=1-d_q3$male,
+  AGE=standardize(d_q3$age),
+  K=7,
+  NP=331,
+  N=9930
+) 
+```
+
+```{r}
+model_q3_1_fit <- stan(file='week08/08_q3_1.stan', data=dat_list_q3, cores=4)
+```
+```{r}
+model_q3_2_fit <- stan(file='week08/08_q3_2.stan', data=dat_list_q3, cores=4)
+```
+
+```{r}
+loo(model_q3_1_fit)
+```
+
+```{r}
+loo(model_q3_2_fit)
+```
+
+```{r}
+compare(model_q3_1_fit, model_q3_2_fit)
+```
+
 

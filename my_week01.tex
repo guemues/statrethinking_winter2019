@@ -1,0 +1,288 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{ifxetex,ifluatex}
+\ifnum 0\ifxetex 1\fi\ifluatex 1\fi=0 % if pdftex
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\hypersetup{
+  pdftitle={Homework 1},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+\urlstyle{same} % disable monospaced font for URLs
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.77,0.63,0.00}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifluatex
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+
+\title{Homework 1}
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+\maketitle
+
+Used libraries are:
+
+\begin{itemize}
+  \item rethinking
+  \item ggplot2
+\end{itemize}
+
+\hypertarget{question-1}{%
+\subsection{Question 1}\label{question-1}}
+
+Suppose the globe tossing data had turned out to be 8 water in 15
+tosses. Construct the posterior distribution, using grid approximation.
+Use the same flat prior as before.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p\_grid }\OtherTok{\textless{}{-}} \FunctionTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\FloatTok{0.99}\NormalTok{, }\DecValTok{1}\SpecialCharTok{/}\DecValTok{100}\NormalTok{)}
+\NormalTok{prior\_of\_p }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\DecValTok{1}\SpecialCharTok{/}\DecValTok{100}\NormalTok{, }\DecValTok{100}\NormalTok{)}
+
+\NormalTok{likelihood }\OtherTok{\textless{}{-}} \FunctionTok{dbinom}\NormalTok{(}\DecValTok{8}\NormalTok{, }\DecValTok{15}\NormalTok{, p\_grid) }\SpecialCharTok{*}\NormalTok{ prior\_of\_p}
+\NormalTok{posterior }\OtherTok{\textless{}{-}}\NormalTok{ likelihood }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(likelihood)}
+
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{p=}\NormalTok{p\_grid, }\AttributeTok{posterior=}\NormalTok{posterior)}
+
+\FunctionTok{ggplot}\NormalTok{(df, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{p, }\AttributeTok{y=}\NormalTok{posterior)) }\SpecialCharTok{+} \FunctionTok{geom\_line}\NormalTok{() }
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{my_week01_files/figure-latex/unnamed-chunk-1-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{samples }\OtherTok{\textless{}{-}} \FunctionTok{sample}\NormalTok{(p\_grid, }\AttributeTok{prob=}\NormalTok{posterior, }\AttributeTok{size=}\FloatTok{1e4}\NormalTok{, }\AttributeTok{replace=}\ConstantTok{TRUE}\NormalTok{) }
+
+\NormalTok{pi }\OtherTok{\textless{}{-}} \FunctionTok{PI}\NormalTok{(samples, }\FloatTok{0.98}\NormalTok{)}
+\NormalTok{posterior\_mean }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(samples)}
+\end{Highlighting}
+\end{Shaded}
+
+Posterior mean is around 0.528746 and 99 interval is between 0.26 and
+0.78
+
+\hypertarget{question-2}{%
+\subsection{Question 2}\label{question-2}}
+
+Start over in 1, but now use a prior that is zero below p = 0.5 and a
+constant above p = 0.5. This corresponds to prior information that a
+majority of the Earth's surface is water. What difference does the
+better prior make? If it helps, compare posterior distributions (using
+both priors) to the true value p = 0.7.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{p\_grid }\OtherTok{\textless{}{-}} \FunctionTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\SpecialCharTok{/}\DecValTok{100}\NormalTok{)}
+\NormalTok{prior\_of\_p\_blow\_05 }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{51}\NormalTok{)}
+\NormalTok{prior\_of\_p\_above\_05 }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\DecValTok{1}\SpecialCharTok{/}\DecValTok{50}\NormalTok{, }\DecValTok{50}\NormalTok{)}
+
+\NormalTok{prior\_of\_p }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(prior\_of\_p\_blow\_05, prior\_of\_p\_above\_05)}
+\FunctionTok{names}\NormalTok{(prior\_of\_p) }\OtherTok{\textless{}{-}}\NormalTok{ p\_grid}
+
+
+\NormalTok{likelihood }\OtherTok{\textless{}{-}} \FunctionTok{dbinom}\NormalTok{(}\DecValTok{8}\NormalTok{, }\DecValTok{16}\NormalTok{, p\_grid) }\SpecialCharTok{*}\NormalTok{ prior\_of\_p}
+\NormalTok{posterior }\OtherTok{\textless{}{-}}\NormalTok{ likelihood }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(likelihood)}
+
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{p=}\NormalTok{p\_grid, }\AttributeTok{posterior=}\NormalTok{posterior)}
+
+\FunctionTok{ggplot}\NormalTok{(df, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x=}\NormalTok{p, }\AttributeTok{y=}\NormalTok{posterior)) }\SpecialCharTok{+} \FunctionTok{geom\_line}\NormalTok{() }
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{my_week01_files/figure-latex/unnamed-chunk-3-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{samples\_2 }\OtherTok{\textless{}{-}} \FunctionTok{sample}\NormalTok{(p\_grid, }\AttributeTok{prob=}\NormalTok{posterior, }\AttributeTok{size=}\FloatTok{1e4}\NormalTok{, }\AttributeTok{replace=}\ConstantTok{TRUE}\NormalTok{) }
+
+\NormalTok{pi\_2 }\OtherTok{\textless{}{-}} \FunctionTok{PI}\NormalTok{(samples\_2, }\FloatTok{0.98}\NormalTok{)}
+\NormalTok{posterior\_mean\_2 }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(samples\_2)}
+\end{Highlighting}
+\end{Shaded}
+
+Posterior mean is around 0.59511 and 99 interval is between 0.51 and
+0.78
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{dens}\NormalTok{( samples , }\AttributeTok{xlab=}\StringTok{"p"}\NormalTok{ , }\AttributeTok{xlim=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{1}\NormalTok{) , }\AttributeTok{ylim=}\FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{,}\DecValTok{8}\NormalTok{) , }\AttributeTok{show.HPDI=}\FloatTok{0.5}\NormalTok{)}
+\FunctionTok{dens}\NormalTok{( samples\_2 , }\AttributeTok{add=}\ConstantTok{TRUE}\NormalTok{ , }\AttributeTok{lty=}\DecValTok{2}\NormalTok{ , }\AttributeTok{show.HPDI=}\FloatTok{0.5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{my_week01_files/figure-latex/unnamed-chunk-5-1.pdf}
+
+\hypertarget{question-3}{%
+\subsection{Question 3}\label{question-3}}
+
+This problem is more open-ended than the others. Feel free to
+collaborate on the solution. Suppose you want to estimate the Earth's
+proportion of water very precisely. Specifically, you want the 99\%
+percentile interval of the posterior distribution of p to be only 0.05
+wide. This means the distance between the upper and lower bound of the
+interval should be 0.05. How many times will you have to toss the globe
+to do this? I won't require a precise answer. I'm honestly more
+interested in your approach.
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{f }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(trial)\{}
+  
+\NormalTok{  p\_grid }\OtherTok{\textless{}{-}} \FunctionTok{seq}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{1}\NormalTok{, }\DecValTok{1}\SpecialCharTok{/}\DecValTok{100}\NormalTok{)}
+\NormalTok{  prior\_of\_p }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\DecValTok{1}\SpecialCharTok{/}\DecValTok{101}\NormalTok{, }\DecValTok{101}\NormalTok{)}
+  
+  \FunctionTok{names}\NormalTok{(prior\_of\_p) }\OtherTok{\textless{}{-}}\NormalTok{ p\_grid}
+
+  
+\NormalTok{  likelihood }\OtherTok{\textless{}{-}} \FunctionTok{dbinom}\NormalTok{(trial}\SpecialCharTok{/}\DecValTok{2}\NormalTok{, trial, p\_grid) }\SpecialCharTok{*}\NormalTok{ prior\_of\_p}
+\NormalTok{  posterior }\OtherTok{\textless{}{-}}\NormalTok{ likelihood }\SpecialCharTok{/} \FunctionTok{sum}\NormalTok{(likelihood)}
+  
+\NormalTok{  samples }\OtherTok{\textless{}{-}} \FunctionTok{sample}\NormalTok{(p\_grid, }\AttributeTok{prob=}\NormalTok{posterior, }\AttributeTok{size=}\FloatTok{1e4}\NormalTok{, }\AttributeTok{replace=}\ConstantTok{TRUE}\NormalTok{) }
+  
+\NormalTok{  interval }\OtherTok{\textless{}{-}} \FunctionTok{PI}\NormalTok{(samples, }\FloatTok{0.98}\NormalTok{)}
+  
+  \FunctionTok{return}\NormalTok{(}\FunctionTok{as.numeric}\NormalTok{(interval[}\StringTok{\textquotesingle{}99\%\textquotesingle{}}\NormalTok{] }\SpecialCharTok{{-}}\NormalTok{ interval[}\StringTok{\textquotesingle{}1\%\textquotesingle{}}\NormalTok{]))}
+\NormalTok{\}}
+
+\NormalTok{Nlist }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{( }\DecValTok{20}\NormalTok{ , }\DecValTok{50}\NormalTok{ , }\DecValTok{100}\NormalTok{ , }\DecValTok{200}\NormalTok{ , }\DecValTok{500}\NormalTok{ , }\DecValTok{1000}\NormalTok{ , }\DecValTok{2000}\NormalTok{ )}
+\NormalTok{Nlist }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{( Nlist , }\AttributeTok{each=}\DecValTok{100}\NormalTok{ )}
+
+\NormalTok{width }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{( Nlist , f )}
+
+\FunctionTok{plot}\NormalTok{( Nlist , width )}
+\FunctionTok{abline}\NormalTok{( }\AttributeTok{h=}\FloatTok{0.05}\NormalTok{ , }\AttributeTok{col=}\StringTok{"red"}\NormalTok{ )}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{my_week01_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\#ggplot(df, aes(x=trial, y=percentile\_interval)) + geom\_line() }
+\end{Highlighting}
+\end{Shaded}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{width=}\FunctionTok{tapply}\NormalTok{(width, Nlist, }\AttributeTok{FUN=}\NormalTok{mean))}
+
+\NormalTok{knitr}\SpecialCharTok{::}\FunctionTok{kable}\NormalTok{(df, }\AttributeTok{floating.environment=}\StringTok{"sidewaystable"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[]{@{}lr@{}}
+\toprule
+& width \\
+\midrule
+\endhead
+20 & 0.470504 \\
+50 & 0.317603 \\
+100 & 0.224706 \\
+200 & 0.160000 \\
+500 & 0.100000 \\
+1000 & 0.079300 \\
+2000 & 0.051112 \\
+\bottomrule
+\end{longtable}
+
+\end{document}

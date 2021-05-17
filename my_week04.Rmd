@@ -112,7 +112,7 @@ What happens to the effective number of parameters, as measured by PSIS or WAIC,
 becomes more concentrated? Why? Perform some experiments, if you are not sure.
 
 
-```{r}
+```{r,  include=FALSE}
 set.seed(2020)
 
 N <- 20
@@ -377,7 +377,7 @@ result_matrix <- matrix(
   ncol = 3
 )
 
-result_matrix
+head(result_matrix)
 
 
 ```

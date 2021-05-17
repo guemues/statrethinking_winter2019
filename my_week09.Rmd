@@ -1,0 +1,192 @@
+---
+title: "Homework 9"
+output:
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+library(rethinking)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(dagitty)
+library(ggdag)
+library(rstan)
+
+```
+
+## Question 1
+
+Revisit the Bangladesh fertility data, data(bangladesh). Fit a model with both
+varying intercepts by district_id and varying slopes of urban (as a 0/1 indicator
+variable) by district_id. You are still predicting use.contraception. Inspect
+the correlation between the intercepts and slopes. Can you interpret this correlation,
+in terms of what it tells you about the pattern of contraceptive use in the sample? It
+might help to plot the varying effect estimates for both the intercepts and slopes,
+by district. Then you can visualize the correlation and maybe more easily think
+through what it means to have a particular correlation. Plotting predicted proportion of women using contraception, in each district, with urban women on one axis
+and rural on the other, might also help.
+
+```{r}
+
+data(bangladesh)
+
+d_q1 <- bangladesh
+
+d_q1$district_id <- as.integer(as.factor(d_q1$district))
+
+dat_q1 <- data.frame(
+  use.contraception=d_q1$use.contraception,
+  district_id = as.factor(d_q1$district),
+  urban=d_q1$urban
+)
+
+dat_list_q1 <- list(
+  C=d_q1$use.contraception,
+  D=d_q1$district_id,
+  U=d_q1$urban,
+  Uid=d_q1$urban + 1L,
+  N=1934,
+  K=max(d_q1$district_id)
+)
+
+```
+
+
+Lets first fit the fixed effect model using MLE GLM model
+
+```{r}
+
+
+q1_a <- glm(use.contraception ~ district_id : urban, family=binomial, data=dat_q1)
+
+summary.glm(q1_a, correlation = FALSE)
+
+```
+
+Lets fit the fixed effect model using bayesian inference
+
+```{r}
+
+model_q1_1_fit <- stan(file='week09/09_q1_1.stan', data=dat_list_q1, cores=4)
+loo(model_q1_1_fit)
+```
+
+
+```{r}
+model_q1_2_fit <- stan(file='week09/09_q1_2.stan', data=dat_list_q1, cores=4)
+loo(model_q1_2_fit)
+```
+
+```{r}
+model_q1_3_fit <- stan(file='week09/09_q1_3.stan', data=dat_list_q1, cores=4)
+loo(model_q1_3_fit)
+```
+
+```{r}
+model_q1_4_fit <- stan(file='week09/09_q1_4.stan', data=dat_list_q1, cores=4)
+loo(model_q1_4_fit)
+```
+
+## Question 2
+
+Now consider the predictor variables age.centered and living.children,
+also contained in data(bangladesh). Suppose that age influences contraceptive
+use (changing attitudes) and number of children (older people have had more time
+to have kids). Number of children may also directly influence contraceptive use.
+Draw a DAG that reflects these hypothetical relationships. Then build models needed
+to evaluate the DAG. You will need at least two models. Retain district and urban, as in Problem 1. What do you conclude about the causal influence of age and
+children?
+
+Lets first decide on the DAG.
+
+
+```{r}
+dag <- dagitty("dag{
+A -> N
+A -> C
+N -> C
+}")
+
+adjustmentSets( dag , exposure="A" , outcome="C" , effect="direct" )
+
+```
+```{r}
+plot(dag)
+```
+
+
+```{r}
+d_q2 <- bangladesh
+
+d_q2$district_id <- as.integer(as.factor(d_q2$district))
+
+dat_q2 <- data.frame(
+  use.contraception=d_q2$use.contraception,
+  district_id = as.numeric(as.factor(d_q2$district)),
+  age.centered = standardize(d_q2$age.centered),
+  living.children = standardize(d_q2$living.children),
+  urban=d_q2$urban
+)
+
+dat_list_q2 <- list(
+  C=dat_q2$use.contraception,
+  D=dat_q2$district_id,
+  U=dat_q2$urban,
+  Ch=dat_q2$living.children,
+  A=dat_q2$age.centered,
+  N=1934,
+  K=max(dat_q2$district_id)
+)
+
+```
+
+```{r}
+model_q2_1_fit <- stan(file='week09/09_q2_1.stan', data=dat_list_q2, cores=4)
+loo(model_q2_1_fit)
+```
+```{r}
+model_q2_2_fit <- stan(file='week09/09_q2_2.stan', data=dat_list_q2, cores=4)
+loo(model_q2_2_fit)
+```
+
+## Question 3
+
+Modify any models from Problem 2 that contained that children variable and
+model the variable now as a monotonic ordered category, like education from the
+week we did ordered categories. Education in that example had 8 categories. Children here will have fewer (no one in the sample had 8 children). So modify the code
+appropriately. What do you conclude about the causal influence of each additional
+child on use of contraception?
+
+
+```{r}
+d_q3 <- bangladesh
+
+d_q3$district_id <- as.integer(as.factor(d_q3$district))
+
+dat_q3 <- data.frame(
+  use.contraception=d_q3$use.contraception,
+  district_id = as.numeric(as.factor(d_q3$district)),
+  age.centered = standardize(d_q3$age.centered),
+  living.children = d_q3$living.children,
+  urban=d_q3$urban
+)
+
+dat_list_q3 <- list(
+  C=dat_q3$use.contraception,
+  D=dat_q3$district_id,
+  U=dat_q3$urban,
+  Ch=dat_q3$living.children,
+  A=dat_q3$age.centered,
+  N=1934,
+  K=max(dat_q3$district_id)
+)
+
+```
+
+
+```{r}
+model_q3_1_fit <- stan(file='week09/09_q3_1.stan', data=dat_list_q3, cores=4)
+loo(model_q3_1_fit)
+```
+
